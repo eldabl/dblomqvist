@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Silvia core feature.
+ */
+
+include_once('silvia_core.features.inc');

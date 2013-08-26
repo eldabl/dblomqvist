@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the silvia customer bragging feature.
+ */
+
+include_once('silvia_customer_bragging.features.inc');

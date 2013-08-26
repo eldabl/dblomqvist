@@ -1,0 +1,4 @@
+name = Semantic Panels: Rewrite
+description = Rewrite panes
+core = 7.x
+package = Panels

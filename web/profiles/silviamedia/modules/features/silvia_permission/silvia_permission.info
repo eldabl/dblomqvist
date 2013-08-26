@@ -1,0 +1,6 @@
+core = "7.x"
+dependencies[] = "features"
+description = "Set site permissions"
+features[user_permission][] = "access content"
+name = "Silvia Permission"
+package = "Features"

@@ -1,0 +1,16 @@
+# pack-refs with: peeled 
+577642a4ae32e39215eedce2c7c17bea32b7f495 refs/remotes/origin/master
+a80e5a9359cd5dafdbc627b89798144c661f7048 refs/remotes/origin/nodrupal
+8b5a02beba2353379bc3ef3a0bbaf56629539175 refs/remotes/origin/testbranch
+577642a4ae32e39215eedce2c7c17bea32b7f495 refs/tags/2012-w39
+856f4a78450fca5f566c3aefe6ba13e874d1d313 refs/tags/before-removal-of-build
+c5c395680e894d0cdc5cc70ed3768cf0f0396c67 refs/tags/sprint-14
+ebe5fefd216e9e8707c86bd2b0f0fed8328aa2d1 refs/tags/sprint-15
+c2ca1dbca3f03d238200d04be2f9d7806add0340 refs/tags/sprint-15-1
+4be146a6924fd0fb574b567def802a9736d402de refs/tags/sprint-15-2
+434c68e52ed832897875b47c3585424e860f5138 refs/tags/sprint-15-3
+ce0799354b9b5b11841f2d67821a0249f50b7d7e refs/tags/sprint-15-4
+d261d85719310a07ba8816d9d0a92675a3a4dc17 refs/tags/sprint-15-5
+823ea29fe6d2714bb21c8dd2f184400b13ed9c29 refs/tags/sprint-15-6
+9611263f4d77c76e1928dc2864b30b6b6553ecde refs/tags/sprint-17
+c527832e4fc539d9742df8ccce46349523f0a765 refs/tags/sprint-18

@@ -1,0 +1,258 @@
+<?php
+
+/**
+ * @file
+ */
+
+function semantic_panels_rewrite_ctools_plugin_post_alter(&$plugin, &$info) {
+  if ($plugin['plugin type'] !== 'content_types') {
+    return;
+  }
+
+  if (!isset($plugin['edit form'])) {
+    return;
+  }
+
+  _semantic_panels_rewrite_push_form_alter($plugin['edit form']);
+}
+
+function semantic_panels_rewrite_form_alter(&$form, &$form_state, $form_id) {
+  $alter = &drupal_static(__FUNCTION__, _semantic_panels_rewrite_get_form_alters());
+
+  if (!isset($alter[$form_id])) {
+    return;
+  }
+
+  $conf = $form_state['conf'];
+
+  $form['_semantic_machine_name'] = array(
+    '#type' => 'machine_name',
+    '#title' => t('Pane token'),
+    '#default_value' => isset($conf['_semantic_machine_name']) ? $conf['_semantic_machine_name'] : _semantic_panels_rewrite_generate_pane_machine_name($form_state['display'], $form_state['pane']),
+  );
+
+  $form['_semantic_exclude'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Exclude this pane'),
+    '#default_value' => isset($conf['_semantic_exclude']) ? $conf['_semantic_exclude'] : FALSE,
+  );
+  $form['_semantic_alter'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Rewrite the output of this pane'),
+    '#default_value' => isset($conf['_semantic_alter']) ? $conf['_semantic_alter'] : FALSE,
+  );
+  $form['_semantic_alter_rewrite_link'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Output this field as a link'),
+    '#description' => t('If checked, this field will be made into a link. The destination must be given below.'),
+    '#default_value' => isset($conf['_semantic_alter_rewrite_link']) ? $conf['_semantic_alter_rewrite_link'] : FALSE
+  );
+  $form['_semantic_alter_rewrite_link_destination'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link path'),
+    '#description' => t('The Drupal path or absolute URL for this link. You may enter data from this view as per the "Replacement patterns" below.'),
+    '#default_value' => isset($conf['_semantic_alter_rewrite_link_destination']) ? $conf['_semantic_alter_rewrite_link_destination'] : FALSE
+  );
+  $form['_semantic_alter_text'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Text'),
+    '#default_value' => isset($conf['_semantic_alter_text']) ? $conf['_semantic_alter_text'] : '',
+    '#states' => array(
+      'visible' => array(
+        'input[name="_semantic_alter"]' => array('checked' => TRUE),
+      )
+    )
+  );
+
+  $rows = array();
+  foreach ($form_state['display']->content as $pane) {
+    if ($pane->position > $form_state['pane']->position) {
+      continue;
+    }
+
+    if (!isset($pane->configuration['_semantic_machine_name'])) {
+      continue;
+    }
+dpm($pane->configuration);
+    $rows[] = array(
+
+      "[{$pane->configuration['_semantic_machine_name']}]",
+      panels_get_pane_title($pane, $form_state['contexts'])
+    );
+  }
+
+  $form['_semantic_alter_tokens'] = array(
+    '#markup' => theme('table', array(
+      'header' => array(
+        t('Token'),
+        t('Name')
+      ),
+      'rows' => $rows
+    )),
+  );
+
+  array_unshift($form['#submit'], '_semantic_panels_rewrite_form_alter_submit');
+
+
+  if (!empty($form_state['contexts'])) {
+    // Set extended description if both CCK and Token modules are enabled, notifying of unlisted keywords
+    if (module_exists('content') && module_exists('token')) {
+      $description = t('If checked, context keywords will be substituted in this content. Note that CCK fields may be used as keywords using patterns like <em>%node:field_name-formatted</em>.');
+    }
+    elseif (!module_exists('token')) {
+      $description = t('If checked, context keywords will be substituted in this content. More keywords will be available if you install the Token module, see http://drupal.org/project/token.');
+    }
+    else {
+      $description = t('If checked, context keywords will be substituted in this content.');
+    }
+
+    $form['_semantic_substitute'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use context keywords'),
+      '#description' => $description,
+      '#default_value' => !empty($pane->configuration['_semantic_substitute']),
+    );
+    $form['contexts'] = array(
+      '#title' => t('Substitutions'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+
+    $rows = array();
+    foreach ($form_state['contexts'] as $context) {
+      foreach (ctools_context_get_converters('%' . check_plain($context->keyword) . ':', $context) as $keyword => $title) {
+        $rows[] = array(
+          check_plain($keyword),
+          t('@identifier: @title', array('@title' => $title, '@identifier' => $context->identifier)),
+        );
+      }
+    }
+    $header = array(t('Keyword'), t('Value'));
+    $form['contexts']['context'] = array('#markup' => theme('table', array('header' => $header, 'rows' => $rows)));
+  }
+}
+
+function _semantic_panels_rewrite_form_alter_submit($form, &$form_state) {
+  $form_state['values']['_semantic_alter_text'] = filter_xss($form_state['values']['_semantic_alter_text'], $allowed_tags = array('a', 'em', 'strong', 'cite', 'div', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd', 'p', 'span'));
+  foreach (array('_semantic_exclude', '_semantic_alter', '_semantic_alter_text', '_semantic_substitute', '_semantic_alter_rewrite_link_destination', '_semantic_alter_rewrite_link') as $element) {
+    $form_state['conf'][$element] = $form_state['values'][$element];
+  }
+
+  if (empty($form_state['conf']['_semantic_machine_name'])) {
+    $form_state['conf']['_semantic_machine_name'] = _semantic_panels_rewrite_generate_pane_machine_name($form_state['display'], $form_state['pane']);
+  }
+}
+
+function _semantic_panels_rewrite_push_form_alter($form_id) {
+  $cache = &drupal_static(__FUNCTION__, array());
+  if ($form_id !== NULL && !is_array($form_id)) {
+    $cache[$form_id] = $form_id;
+  }
+  return $cache;
+}
+
+function _semantic_panels_rewrite_get_form_alters() {
+  return _semantic_panels_rewrite_push_form_alter(NULL);
+}
+
+function semantic_panels_rewrite_panels_pane_content_alter($content, $pane, $args, $contexts) {
+  $_machine_name = isset($pane->configuration['_semantic_machine_name']) ? $pane->configuration['_semantic_machine_name'] : $pane->pid;
+  $_content = isset($content->content) ? $content->content : '';
+
+  if (is_array($_content)) {
+    $_content = drupal_render($_content);
+  }
+
+  _semantic_panels_rewrite_set_content($_machine_name, $_content);
+
+  if (isset($pane->configuration['_semantic_alter']) && $pane->configuration['_semantic_alter'] == TRUE) {
+    $text = $pane->configuration['_semantic_alter_text'];
+
+    preg_match_all('/\[([^\s\[\]]*)\]/x', $text, $matches);
+
+    $tokens = array();
+    $values = array();
+
+    foreach ($matches[1] as $pid) {
+      $tokens[] = "[{$pid}]";
+      $values[] = _semantic_panels_rewrite_get_content($pid);
+    }
+
+    $content->content = str_replace($tokens, $values, $text);
+
+    if (!empty($contexts) && !empty($pane->configuration['_semantic_substitute'])) {
+      $content->content = ctools_context_keyword_substitute($content->content, array(), $contexts);
+
+      _semantic_panels_rewrite_set_content($_machine_name, $content->content);
+    }
+
+    _semantic_panels_rewrite_set_content($_machine_name, $content->content);
+  }
+
+  if (isset($pane->configuration['_semantic_alter_rewrite_link']) && $pane->configuration['_semantic_alter_rewrite_link'] == TRUE) {
+    $text = $pane->configuration['_semantic_alter_text'];
+
+    preg_match_all('/\[([^\s\[\]]*)\]/x', $text, $matches);
+
+    $tokens = array();
+    $values = array();
+
+    foreach ($matches[1] as $pid) {
+      $tokens[] = "[{$pid}]";
+      $values[] = _semantic_panels_rewrite_get_content($pid);
+    }
+
+    $link = ctools_context_keyword_substitute($pane->configuration['_semantic_alter_rewrite_link_destination'], array(), $contexts);
+
+    $content->content = l($_content, $link, array('html' => TRUE));
+
+    _semantic_panels_rewrite_set_content($_machine_name, $content->content);
+  }
+
+  if (isset($pane->configuration['_semantic_exclude']) && $pane->configuration['_semantic_exclude'] == TRUE) {
+    $content->content = NULL;
+  }
+}
+
+function _semantic_panels_rewrite_set_content($machine_name, $content) {
+  $cache = &drupal_static(__FUNCTION__, array());
+
+  if (!isset($cache[$machine_name])) {
+    $cache[$machine_name] = '';
+  }
+
+  if ($content !== NULL) {
+    $cache[$machine_name] = $content;
+  }
+
+  return $cache[$machine_name];
+}
+
+function _semantic_panels_rewrite_get_content($pid) {
+  return _semantic_panels_rewrite_set_content($pid, NULL);
+}
+
+function _semantic_panels_rewrite_generate_pane_machine_name($display, $pane) {
+  $cache = &drupal_static(__FUNCTION__, array());
+
+  if (!isset($cache[$display->did])) {
+    foreach ($display->panes as $_pane) {
+      if (isset($_pane->configuration['_semantic_machine_name'])) {
+        $cache[$display->did][$_pane->pid] = $_pane->configuration['_semantic_machine_name'];
+      }
+    }
+  }
+
+  if (!isset($cache[$display->did][$pane->pid])) {
+    $id = 0;
+    $machine_name = $pane->type;
+    while (in_array($machine_name, $cache[$display->did])) {
+      $machine_name = $pane->type . '_' . ++$id;
+    }
+
+    $cache[$display->did][$pane->pid] = $machine_name;
+  }
+
+  return $cache[$display->did][$pane->pid];
+}

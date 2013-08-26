@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * Update node reference field to entityreference.
+ */
+function ns_prod_rss_update_7201() {
+  module_load_include('install', 'ns_core');
+  ns_core_migrate_references_field('field_ns_prod_rss_promo_article');
+}
+
+/**
+ * Removed reference field from RSS to Topic
+ */
+function ns_prod_rss_update_7202() {
+  field_delete_field('field_ns_prod_rss_web_topic');
+}

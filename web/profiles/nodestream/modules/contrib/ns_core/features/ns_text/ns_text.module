@@ -1,0 +1,6 @@
+<?php
+/**
+ * @file
+ */
+
+include_once('ns_text.features.inc');

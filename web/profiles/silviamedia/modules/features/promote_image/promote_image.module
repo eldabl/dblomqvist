@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Promote image feature.
+ */
+
+include_once('promote_image.features.inc');

@@ -1,0 +1,18 @@
+name = "Silvia Media"
+description = "Custom theme for Silvia Media."
+core = "7.x"
+engine = "phptemplate"
+
+stylesheets[all][] = css/silvia-reset.css
+stylesheets[all][] = css/fluid_grid.css
+stylesheets[all][] = css/layout.css
+stylesheets[all][] = css/typography.css
+stylesheets[all][] = css/silvia.css
+stylesheets[all][] = css/media-queries.css
+
+; scripts[] = "../../libraries/jquery.cycle/jquery.cycle.min.js"
+
+scripts[] = "js/jquery.fittext.js"
+scripts[] = "js/silviamedia.js"
+
+plugins[panels][layouts] = layouts

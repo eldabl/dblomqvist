@@ -1,0 +1,5 @@
+name = silvia_custom
+description = "Hooks and alters"
+version = 7.x-1.x-dev
+package = "silviamedia.se"
+core = 7.x

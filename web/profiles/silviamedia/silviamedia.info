@@ -1,0 +1,73 @@
+name = Silvia Media
+description = Installation profile for Silvia Media
+core = 7.x
+theme = seven
+
+; NS Core is a module that contains the upgrade path for all NodeStream
+; sites and some other goodies that is required for NodeStream to work.
+; We use a module instead of a profile, since it we can make NodeStream
+; features profile independent.
+dependencies[] = ns_core
+
+; Core
+dependencies[] = menu
+dependencies[] = dblog
+dependencies[] = help
+dependencies[] = menu
+dependencies[] = taxonomy
+dependencies[] = field_ui
+dependencies[] = block
+dependencies[] = list
+
+
+; Contrib
+dependencies[] = admin_menu
+dependencies[] = admin_menu_toolbar
+dependencies[] = taxonomy_menu_form
+dependencies[] = views
+dependencies[] = panels
+dependencies[] = panels_everywhere
+dependencies[] = panels_mini
+dependencies[] = ctools
+dependencies[] = features
+dependencies[] = diff
+dependencies[] = pathauto
+dependencies[] = strongarm
+dependencies[] = wysiwyg
+dependencies[] = views_slideshow
+dependencies[] = views_slideshow_cycle
+#dependencies[] = google_fonts
+dependencies[] = module_filter
+dependencies[] = semanticviews
+dependencies[] = views_content
+dependencies[] = php
+dependencies[] = menu_block
+dependencies[] = email
+dependencies[] = ctools_custom_content
+dependencies[] = semantic_panels
+dependencies[] = contextual
+dependencies[] = menu_position
+
+; DEVELOPMENT MODULES
+dependencies[] = devel
+dependencies[] = views_ui
+
+
+; CUSTOM MODULES
+dependencies[] = silvia_custom
+
+; Silvia Media features
+dependencies[] = silvia_core
+dependencies[] = silvia_customer_bragging
+dependencies[] = silvia_contact
+dependencies[] = silvia_blog
+dependencies[] = page
+dependencies[] = staff
+dependencies[] = silvia_permission
+dependencies[] = silvia_contact_puff_allow_overrriden
+dependencies[] = promote_image
+
+
+; NodeStream features. We can pick which features we want to use,
+; no NodeStream features are required.
+; dependencies[] = ns_ch_web
