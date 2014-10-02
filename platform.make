@@ -12,7 +12,7 @@ core = 7.x
 ; Drupal project.
 projects[drupal] = 7.12
 
-; This is the dev version, so we point to the dev version of NodeStream.
+; test This is the dev version, so we point to the dev version of NodeStream.
 projects[nodestream][type] = profile
 projects[nodestream][download][type] = git
 projects[nodestream][download][url] = http://git.drupal.org/project/nodestream
