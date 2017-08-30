@@ -1338,7 +1338,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket { color: #bf360c; }
 
 .dense_theme .file_reference:hover a:not(.member):not(.member_name):not(.icon):not(.timestamp) { color: #e6e6e6; }
 
-.dense_theme .file_reference:hover a:hover:not(.member):not(.member_name):not(.icon):not(.timestamp) { color: #c7c7c7; }
+.dense_theme .file_reference:hover a:hover:not(.member):not(.member_name):not(.icon):not(.timestamp) { color: #e6e6e6; }
 
 .dense_theme .file_reference:hover a.file_download_link { color: #949494 !important; }
 
